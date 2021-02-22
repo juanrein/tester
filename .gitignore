@@ -1,0 +1,6 @@
+restapi/node_modules
+restapi/ps_scripts
+
+.vs
+bin
+obj
