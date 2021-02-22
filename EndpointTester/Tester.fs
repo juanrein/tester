@@ -9,11 +9,11 @@ Runs test suite of hierarchical tests and prints their results
 open System.Net.Http
 open System
 
+
 type HttpTest =
-| Root of Uri:string * Tests: List<HttpTest>
+| Route of Uri:string * Tests: List<HttpTest>
 | Method of Method: HttpMethod * Tests: List<HttpTest>
-| Endpoint of Uri: string * Tests: List<HttpTest>
-| Test of Parameters: List<(string * string)> * Expected: string
+| Test of Parameters: List<string * string> * Expected: string
 
 type TestBuilder = {
     Method: HttpMethod option
@@ -24,8 +24,6 @@ type TestBuilder = {
 }
 
 exception IncompleteError of string
-
-
 
 type TestResult = {
     Actual: string
@@ -76,7 +74,7 @@ let rec buildTests (builder: TestBuilder) (test:HttpTest) =
         | None -> Some b
     
     match test with
-    | Root(url, tests) -> 
+    | Route(url, tests) -> 
         let path2 = setOrAppend builder.Uri url
         tests
         |> List.map (buildTests {builder with Uri = path2}) 
@@ -85,12 +83,6 @@ let rec buildTests (builder: TestBuilder) (test:HttpTest) =
     | Method(method, tests) ->
         tests 
         |> List.map (buildTests {builder with Method = Some method})
-        |> List.concat
-
-    | Endpoint(url, tests) ->
-        let path2 = setOrAppend builder.Uri url
-        tests 
-        |> List.map (buildTests {builder with Uri = path2})
         |> List.concat
    
     | Test(parameters, expected) ->
